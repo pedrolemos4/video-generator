@@ -1,0 +1,12 @@
+# Python
+__pycache__/*
+.venv/*
+
+# Custom
+secrets.json
+imgs/*
+generated-audios/*
+generated-subtitles/*
+generated-videos/*
+videos/*
+imgs/*

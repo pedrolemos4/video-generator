@@ -1,0 +1,262 @@
+[
+    {
+        "label": "BytesIO",
+        "importPath": "io",
+        "description": "io",
+        "isExtraImport": true,
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "detect",
+        "importPath": "langdetect",
+        "description": "langdetect",
+        "isExtraImport": true,
+        "detail": "langdetect",
+        "documentation": {}
+    },
+    {
+        "label": "gTTS",
+        "importPath": "gtts",
+        "description": "gtts",
+        "isExtraImport": true,
+        "detail": "gtts",
+        "documentation": {}
+    },
+    {
+        "label": "AudioSegment",
+        "importPath": "pydub",
+        "description": "pydub",
+        "isExtraImport": true,
+        "detail": "pydub",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "moviepy.editor",
+        "description": "moviepy.editor",
+        "isExtraImport": true,
+        "detail": "moviepy.editor",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "moviepy.editor",
+        "description": "moviepy.editor",
+        "isExtraImport": true,
+        "detail": "moviepy.editor",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "moviepy.editor",
+        "description": "moviepy.editor",
+        "isExtraImport": true,
+        "detail": "moviepy.editor",
+        "documentation": {}
+    },
+    {
+        "label": "math",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "math",
+        "description": "math",
+        "detail": "math",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "WhisperModel",
+        "importPath": "faster_whisper",
+        "description": "faster_whisper",
+        "isExtraImport": true,
+        "detail": "faster_whisper",
+        "documentation": {}
+    },
+    {
+        "label": "pysrt",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pysrt",
+        "description": "pysrt",
+        "detail": "pysrt",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "uvicorn",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "uvicorn",
+        "description": "uvicorn",
+        "detail": "uvicorn",
+        "documentation": {}
+    },
+    {
+        "label": "praw",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "praw",
+        "description": "praw",
+        "detail": "praw",
+        "documentation": {}
+    },
+    {
+        "label": "generate_audio,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "generate_audio.",
+        "description": "generate_audio.",
+        "detail": "generate_audio.",
+        "documentation": {}
+    },
+    {
+        "label": "detect_language",
+        "kind": 2,
+        "importPath": "generate_audio",
+        "description": "generate_audio",
+        "peekOfCode": "def detect_language(text):\n    try:\n        language = detect(text)\n        return language\n    except Exception as e:\n        print(f\"Error detecting language: {e}\")\n        return None\nfrom moviepy.editor import *\ndef split_audio(audio_path, number):\n    audioclip = AudioFileClip(audio_path)",
+        "detail": "generate_audio",
+        "documentation": {}
+    },
+    {
+        "label": "split_audio",
+        "kind": 2,
+        "importPath": "generate_audio",
+        "description": "generate_audio",
+        "peekOfCode": "def split_audio(audio_path, number):\n    audioclip = AudioFileClip(audio_path)\n    files_name = []\n    total_duration = audioclip.duration\n    start_time = 0\n    end_time = MAX_TIME_DURATION_SECONDS\n    segment_index = 1\n    while start_time < total_duration:\n        if end_time > total_duration:\n            end_time = total_duration",
+        "detail": "generate_audio",
+        "documentation": {}
+    },
+    {
+        "label": "generate_audio",
+        "kind": 2,
+        "importPath": "generate_audio",
+        "description": "generate_audio",
+        "peekOfCode": "def generate_audio(text: str):\n    files = os.listdir(\".\\\\generated-audios\")\n    numbers_final = [\n        int(file.replace(\"output-\", \"\").replace(\".wav\", \"\"))\n        for file in files\n        if file.startswith(\"output\") and file.endswith(\".wav\")\n    ]\n    if not numbers_final:\n        next_number_final = 1\n    else:",
+        "detail": "generate_audio",
+        "documentation": {}
+    },
+    {
+        "label": "MAX_TIME_DURATION_SECONDS",
+        "kind": 5,
+        "importPath": "generate_audio",
+        "description": "generate_audio",
+        "peekOfCode": "MAX_TIME_DURATION_SECONDS = 65\ndef detect_language(text):\n    try:\n        language = detect(text)\n        return language\n    except Exception as e:\n        print(f\"Error detecting language: {e}\")\n        return None\nfrom moviepy.editor import *\ndef split_audio(audio_path, number):",
+        "detail": "generate_audio",
+        "documentation": {}
+    },
+    {
+        "label": "format_time",
+        "kind": 2,
+        "importPath": "generate_video",
+        "description": "generate_video",
+        "peekOfCode": "def format_time(seconds):\n    hours = math.floor(seconds / 3600)\n    seconds %= 3600\n    minutes = math.floor(seconds / 60)\n    seconds %= 60\n    milliseconds = round((seconds - math.floor(seconds)) * 1000)\n    seconds = math.floor(seconds)\n    formatted_time = f\"{hours:02d}:{minutes:02d}:{seconds:01d},{milliseconds:03d}\"\n    return formatted_time\ndef transcribe(audio):",
+        "detail": "generate_video",
+        "documentation": {}
+    },
+    {
+        "label": "transcribe",
+        "kind": 2,
+        "importPath": "generate_video",
+        "description": "generate_video",
+        "peekOfCode": "def transcribe(audio):\n    model = WhisperModel(\"small\")\n    segments, info = model.transcribe(audio)\n    language = info[0]\n    print(\"Transcription language\", info[0])\n    segments = list(segments)\n    for segment in segments:\n        print(\"[%.2fs -> %.2fs] %s\" % (segment.start, segment.end, segment.text))\n    return language, segments\ndef generate_subtitle_file(filename, language, segments):",
+        "detail": "generate_video",
+        "documentation": {}
+    },
+    {
+        "label": "generate_subtitle_file",
+        "kind": 2,
+        "importPath": "generate_video",
+        "description": "generate_video",
+        "peekOfCode": "def generate_subtitle_file(filename, language, segments):\n    subtitle_file = f\".\\\\generated-subtitles\\\\sub-{filename}.{language}.srt\"\n    text = \"\"\n    for index, segment in enumerate(segments):\n        segment_start = format_time(segment.start)\n        segment_end = format_time(segment.end)\n        text += f\"{str(index+1)} \\n\"\n        text += f\"{segment_start} --> {segment_end} \\n\"\n        text += f\"{segment.text} \\n\"\n        text += \"\\n\"",
+        "detail": "generate_video",
+        "documentation": {}
+    },
+    {
+        "label": "wrap_text",
+        "kind": 2,
+        "importPath": "generate_video",
+        "description": "generate_video",
+        "peekOfCode": "def wrap_text(text):\n    max_width = 30\n    words = text.split()\n    lines = []\n    current_line = \"\"\n    for word in words:\n        if current_line and len(current_line) + len(word) + 1 > max_width:\n            lines.append(current_line)\n            current_line = word\n        else:",
+        "detail": "generate_video",
+        "documentation": {}
+    },
+    {
+        "label": "generate_video",
+        "kind": 2,
+        "importPath": "generate_video",
+        "description": "generate_video",
+        "peekOfCode": "def generate_video(audio_path: str):\n    video_directory = \".\\\\videos\\\\\"\n    target_width = 1080\n    target_height = 1920\n    # Get a list of all video files in the directory\n    video_files = [\n        f\n        for f in os.listdir(video_directory)\n        if os.path.isfile(os.path.join(video_directory, f))\n    ]",
+        "detail": "generate_video",
+        "documentation": {}
+    },
+    {
+        "label": "UrlItem",
+        "kind": 6,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "class UrlItem(BaseModel):\n    url: str\nwith open(\"secrets.json\") as f:\n    secrets = json.load(f)\nreddit = praw.Reddit(\n    client_id=secrets[\"client_id\"],\n    client_secret=secrets[\"client_secret\"],\n    password=secrets[\"password\"],\n    user_agent=secrets[\"user_agent\"],\n    username=secrets[\"username\"],",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "reddit",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "reddit = praw.Reddit(\n    client_id=secrets[\"client_id\"],\n    client_secret=secrets[\"client_secret\"],\n    password=secrets[\"password\"],\n    user_agent=secrets[\"user_agent\"],\n    username=secrets[\"username\"],\n)\napp = FastAPI()\n@app.post(\"/gen-from-url\")\nasync def video_gen_from_url(url: UrlItem):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "app",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "app = FastAPI()\n@app.post(\"/gen-from-url\")\nasync def video_gen_from_url(url: UrlItem):\n    print(\"Video to generate: \" + url.url)\n    submission_id = url.url.split(\"/\")[6]\n    submission = reddit.submission(id=submission_id)\n    thread_text = submission.selftext\n    output_filenames = generate_audio.generate_audio(thread_text)\n    if len(output_filenames) > 1:\n        allFiles = \"\"",
+        "detail": "main",
+        "documentation": {}
+    }
+]
