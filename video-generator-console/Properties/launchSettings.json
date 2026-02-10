@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "video-generator-console": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
