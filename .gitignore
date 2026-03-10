@@ -1,6 +1,10 @@
-.venv/
-__pycache__/
+# Files
 *.pyc
 *.pyo
+.DS_Store
+
+# Folders
+.venv/
+__pycache__/
 output/
 videos/

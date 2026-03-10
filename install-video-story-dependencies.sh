@@ -45,6 +45,16 @@ log "Installing Python3 and pip..."
 apt-get install -y python3 python3-pip > /dev/null
 success "Python3 installed: $(python3 --version)"
 
+log "Installing python3-venv (required to create virtual environments)..."
+PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+apt-get install -y "python${PYTHON_VERSION}-venv" > /dev/null 2>&1 || \
+apt-get install -y python3-venv > /dev/null
+success "python${PYTHON_VERSION}-venv installed"
+
+log "Upgrading pip to latest version..."
+python3 -m pip install --upgrade pip --break-system-packages --quiet
+success "pip upgraded: $(pip3 --version)"
+
 # ── 4. curl ───────────────────────────────────────────────────────────────────
 log "Installing curl (for cloud API calls)..."
 apt-get install -y curl > /dev/null
