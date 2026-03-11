@@ -16,12 +16,12 @@ from pathlib import Path
 
 class Variables:
 
-    SOURCE_VIDEO = "../../videos/minecraft-parkour.mp4"
+    SOURCE_VIDEO = "../videos/minecraft-parkour.mp4"
 
     PAD_START = 0.5
     PAD_END = 0.5
 
-    OUTPUT_DIR = Path("../../output")
+    OUTPUT_DIR = Path("../output")
 
     WHISPER_MODEL = "small"
 
