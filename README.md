@@ -22,18 +22,24 @@ Generates short videos from a text story. It picks a random segment from a long 
 src/
 │
 ├── _pipeline/                     ← reusable pipeline modules
-│   ├── merger.py                  ← Merger  — merges video, audio, subtitles
+│   ├── merger.py                  ← Merger — merges video, audio, subtitles
 │   ├── subtitles.py               ← Subtitles — builds SRT from transcript
 │   ├── transcriber.py             ← Transcriber — Whisper transcription
 │   ├── tts.py                     ← TTS — text-to-speech with SSML
 │   └── videos.py                  ← Video — cuts random segment from source
 │
-├── story-background/              ← this project
-│   └── main.py                    ← entry point
+├── features/
+│   └── story_background.py        ← StoryBackground — full pipeline as a class
 │
-└── utils/
-    ├── global_variables.py        ← Config — all default values
-    └── utils.py                   ← Utils — log, run, get_duration
+├── middleware/
+│   └── video_generator_middleware.py         ← VideoGeneratorMiddleware — routes requests to the right pipeline
+│
+├── utils/
+│   ├── global_variables.py        ← Variables — all default values
+│   └── utils.py                   ← Utils — log, run, get_duration
+│
+├── models.py                      ← Request and response models (StoryRequest, ClipsRequest, etc.)
+└── main.py                        ← FastAPI entry point
 ```
 
 ---
@@ -56,7 +62,7 @@ source .venv/bin/activate
 ### 3. Install Python packages
 
 ```bash
-pip install edge-tts openai-whisper
+pip3 install edge-tts openai-whisper fastapi uvicorn pydantic
 ```
 
 ---
@@ -66,20 +72,20 @@ pip install edge-tts openai-whisper
 Place your long video (e.g. a 30min gameplay clip) at the path defined in `utils/global_variables.py`:
 
 ```python
-SOURCE_VIDEO = "../../videos/source.mp4"
+SOURCE_VIDEO = "../videos/source.mp4"
 ```
 
-Or pass a different path at runtime using `--source`. The video must be longer than your story's audio — the script picks a random segment each run.
+The video must be longer than your story's audio — the script picks a random segment each run.
 
 ---
 
 ## Adding stories
 
-Create `.txt` files anywhere and point to them with `--story-file`:
+Create `.txt` files inside the `stories/` folder:
 
 ```text
-src/story-background/stories/1.txt
-src/story-background/stories/2.txt
+stories/1.txt
+stories/2.txt
 ```
 
 Each file should contain plain text — no special formatting needed:
@@ -93,20 +99,71 @@ would navigate by memory, cursing the broken beacon that once guided them home.
 
 ## How to run
 
-Activate the virtual environment first:
+### With Docker (recommended)
+
+```bash
+./build-run-docker.sh
+```
+
+### Manually
 
 ```bash
 source .venv/bin/activate
+cd src
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
+---
+
+## API
+
+### Submit a job
+
 ```bash
-python3 main.py --story-file stories/1.txt
-python3 main.py --story "Once upon a time..."
-python3 main.py --story-file stories/1.txt --voice en-US-GuyNeural
-python3 main.py --story-file stories/1.txt --source /path/to/video.mp4
-python3 main.py --story-file stories/1.txt --model base
-python3 main.py --list-voices
+curl -X POST "http://localhost:8000/videos" \
+  -H "Content-Type: application/json" \
+  -d '{"type": "story", "story": "Once upon a time..."}'
 ```
+
+### Check status
+
+```bash
+curl "http://localhost:8000/videos/{job_id}"
+```
+
+### Download the result
+
+```bash
+curl "http://localhost:8000/videos/{job_id}/download" -o output.mp4
+```
+
+### List all jobs
+
+```bash
+curl "http://localhost:8000/videos"
+```
+
+---
+
+## Request types
+
+### `story`
+
+| Field | Default | Description |
+| - | - | - |
+| `type` | — | `"story"` |
+| `story` | — | Story text |
+| `voice` | `en-US-JennyNeural` | TTS voice |
+| `model` | `small` | Whisper model size |
+| `source` | `/app/videos/source.mp4` | Path to source video |
+
+### `clips` *(coming soon)*
+
+| Field | Default | Description |
+| - | - | - |
+| `type` | — | `"clips"` |
+| `source` | — | Path to the video to split |
+| `clip_duration` | `65` | Seconds per clip |
 
 ---
 
@@ -116,12 +173,12 @@ Edit defaults in `utils/global_variables.py`:
 
 | Variable | Default | Description |
 | - | - | - |
-| `SOURCE_VIDEO` | `../../videos/source.mp4` | Path to source video |
+| `SOURCE_VIDEO` | `/app/videos/source.mp4` | Path to source video |
 | `WHISPER_MODEL` | `small` | Whisper model size |
 | `DEFAULT_VOICE` | `en-US-JennyNeural` | TTS voice |
 | `PAD_START` | `0.5` | Seconds of silent video before audio |
 | `PAD_END` | `0.5` | Seconds of silent video after audio |
-| `OUTPUT_DIR` | `../../output` | Where final videos are saved |
+| `OUTPUT_DIR` | `/app/output` | Where final videos are saved |
 | `SUBTITLE_STYLE` | Arial 22px white | ffmpeg subtitle style string |
 
 ---
@@ -169,7 +226,7 @@ The terminal prints a summary when done:
 
 ```text
 ────────────────────────────────────────────────────
-  ✅  Done! Output: /home/pedro/video-generator/output/story_1741234567.mp4
+  ✅  Done! Output: /app/output/story_1741234567.mp4
   🎬  Total video:  35.50s
   ⏱   Lead-in:      0s → 0.5s  (silent)
   🎵  Audio+subs:   0.5s → 35.0s
@@ -188,3 +245,5 @@ The terminal prints a summary when done:
 | `edge-tts` | pip | Text-to-speech, free, no API key needed |
 | `openai-whisper` | pip | Local audio transcription |
 | `whisper-ctranslate2` | pip (optional) | Faster transcription on CPU |
+| `fastapi` | pip | API framework |
+| `uvicorn` | pip | ASGI server |

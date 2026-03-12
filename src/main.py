@@ -19,14 +19,19 @@ Example:
          -d '{"story": "Once upon a time..."}'
 """
 
-import time
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import Union
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
-from models.api_models import GenerateRequest, JobResponse, StatusResponse
+from models.api_models import (
+    ClipsRequest,
+    GenerateRequest,
+    JobResponse,
+    StatusResponse,
+    StoryRequest,
+)
 
 from middleware.video_generator_middleware import VideoGeneratorMiddleware
 
@@ -59,8 +64,10 @@ def root():
     return {"status": "ok", "message": "Video Story Pipeline API is running"}
 
 
-@app.post("/generate", response_model=JobResponse, status_code=202)
-async def generate(request: GenerateRequest, background_tasks: BackgroundTasks):
+@app.post("/videos", response_model=JobResponse, status_code=202)
+async def generate(
+    request: Union[StoryRequest, ClipsRequest], background_tasks: BackgroundTasks
+):
     """
     Submit a story for video generation.
     Returns a job_id immediately — generation runs in the background.

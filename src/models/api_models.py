@@ -1,15 +1,43 @@
-from typing import Optional
+#!/usr/bin/env python3
+"""
+models.py
+---------
+Request and response models for the Video Story Pipeline API.
+
+All requests share a base `type` field. The middleware uses this
+to decide which pipeline to run and which fields to expect.
+"""
+
+from typing import Literal, Optional
 from pydantic import BaseModel
 from utils.global_variables import Variables
 
-# ── Request / Response models ─────────────────────────────────────────────────
+
+# ── Base ──────────────────────────────────────────────────────────────────────
 
 
-class GenerateRequest(BaseModel):
+class BaseVideoRequest(BaseModel):
+    type: str
+
+
+# ── Request types ─────────────────────────────────────────────────────────────
+
+
+class StoryRequest(BaseVideoRequest):
+    type: Literal["story"] = "story"
     story: str
     voice: str = Variables.DEFAULT_VOICE
     model: str = Variables.WHISPER_MODEL
     source: str = Variables.SOURCE_VIDEO
+
+
+class ClipsRequest(BaseVideoRequest):
+    type: Literal["clips"] = "clips"
+    source: str  # path to the video to split
+    clip_duration: int = 65  # seconds per clip (default 1m05s)
+
+
+# ── Response types ────────────────────────────────────────────────────────────
 
 
 class JobResponse(BaseModel):
