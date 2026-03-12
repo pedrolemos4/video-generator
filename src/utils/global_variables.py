@@ -15,7 +15,11 @@ from pathlib import Path
 
 
 class Variables:
+    # Set at start
+    TELEGRAM_BOT_TOKEN = ""
+    TELEGRAM_CHANNEL_ID = ""
 
+    # Static
     SOURCE_VIDEO = "../videos/minecraft-parkour.mp4"
 
     PAD_START = 0.5
@@ -38,3 +42,5 @@ class Variables:
         "Alignment=2,"
         "MarginV=40"
     )
+
+    MIN_CLIP_DURATION = 60  # seconds — never cut below this

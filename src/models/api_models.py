@@ -32,9 +32,7 @@ class StoryRequest(BaseVideoRequest):
 
 
 class ClipsRequest(BaseVideoRequest):
-    type: Literal["clips"] = "clips"
-    source: str  # path to the video to split
-    clip_duration: int = 65  # seconds per clip (default 1m05s)
+    content: bytes
 
 
 # ── Response types ────────────────────────────────────────────────────────────

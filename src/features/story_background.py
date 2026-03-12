@@ -27,6 +27,7 @@ from _pipeline.videos import Video
 from _pipeline.merger import Merger
 from utils.utils import Utils
 from utils.global_variables import Variables
+from utils.telegram import Telegram
 
 
 class StoryBackground:
@@ -77,6 +78,10 @@ class StoryBackground:
             Subtitles.build(transcript, srt_file, offset=Variables.PAD_START)
             self.video.cut_segment(self.source, audio_duration, cut_vid)
             self.merger.merge(cut_vid, tts_audio, srt_file, output_file)
+
+            await Telegram.send_video(
+                output_file, caption=f"✅ Story ready — job {job_id}"
+            )
 
             total = audio_duration + Variables.PAD_START + Variables.PAD_END
             print(f"\n{'─'*52}")

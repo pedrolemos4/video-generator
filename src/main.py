@@ -19,10 +19,12 @@ Example:
          -d '{"story": "Once upon a time..."}'
 """
 
+import os
 from pathlib import Path
+import sys
 from typing import Union
 
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from models.api_models import (
     ClipsRequest,
@@ -30,8 +32,10 @@ from models.api_models import (
     StatusResponse,
     StoryRequest,
 )
+from dotenv import load_dotenv
 
 from middleware.video_generator_middleware import VideoGeneratorMiddleware
+from utils.global_variables import Variables
 from utils.utils import Utils
 from models.domain_models import Job
 
@@ -43,12 +47,42 @@ app = FastAPI(
     version="1.0.0",
 )
 
+load_dotenv()
+
+Variables.TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+Variables.TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
+
+if not Variables.TELEGRAM_BOT_TOKEN or not Variables.TELEGRAM_CHANNEL_ID:
+    print("ERROR: TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID must be set in .env")
+    sys.exit(1)
+
 # ── In-memory job store ───────────────────────────────────────────────────────
 
 jobs: list[Job] = []
 
 
 # ── Pipeline runner ───────────────────────────────────────────────────────────
+
+
+async def new_job(
+    request: Union[StoryRequest, ClipsRequest], background_tasks: BackgroundTasks
+) -> str:
+    """Create a new job for the given request and run the pipeline in the background."""
+
+    job_id = Utils.generate_job_id(jobs)
+    jobs.append(
+        Job(
+            job_id=job_id,
+            status="pending",
+            output=None,
+            error=None,
+            duration=None,
+        )
+    )
+
+    background_tasks.add_task(run_pipeline, job_id, request)
+
+    return job_id
 
 
 async def run_pipeline(job_id: str, request):
@@ -64,10 +98,8 @@ def root():
     return {"status": "ok", "message": "Video Story Pipeline API is running"}
 
 
-@app.post("/videos", response_model=JobResponse, status_code=202)
-async def generate(
-    request: Union[StoryRequest, ClipsRequest], background_tasks: BackgroundTasks
-):
+@app.post("/generate-video", response_model=JobResponse, status_code=202)
+async def generate(request: StoryRequest, background_tasks: BackgroundTasks):
     """
     Submit a story for video generation.
     Returns a job_id immediately — generation runs in the background.
@@ -76,18 +108,29 @@ async def generate(
     if not request.story.strip():
         raise HTTPException(status_code=400, detail="Story text cannot be empty")
 
-    job_id = Utils.generate_job_id(jobs)
-    jobs.append(
-        Job(
-            job_id=job_id,
-            status="pending",
-            output=None,
-            error=None,
-            duration=None,
-        )
+    job_id = await new_job(request, background_tasks)
+
+    return JobResponse(
+        job_id=job_id,
+        status="pending",
+        message=f"Job accepted. Poll /status/{job_id} to check progress.",
     )
 
-    background_tasks.add_task(run_pipeline, job_id, request)
+
+@app.post("/upload-video", response_model=JobResponse, status_code=202)
+async def upload_video(
+    file: UploadFile = File(...), background_tasks: BackgroundTasks = None
+):
+    """
+    Upload a video for splitting into clips with subtitles.
+    Returns a job_id immediately — generation runs in the background.
+    """
+    if not file.filename.endswith(".mp4"):
+        raise HTTPException(status_code=400, detail="Only .mp4 files are supported")
+
+    content = await file.read()
+    request = ClipsRequest(content=content)
+    job_id = await new_job(request, background_tasks)
 
     return JobResponse(
         job_id=job_id,

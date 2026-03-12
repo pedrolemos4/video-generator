@@ -53,6 +53,7 @@ class VideoGeneratorMiddleware:
             job.status = "error"
             job.error = str(e)
 
+    # Implement new pipeline
     async def _dispatch(
         self, request: Union[StoryRequest, ClipsRequest], job_id: str
     ) -> Path:
