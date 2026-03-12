@@ -5,7 +5,7 @@ main.py
 FastAPI wrapper for the Video Story Pipeline.
 
 Endpoints:
-    POST /generate          — submit a story, get a job_id back
+    POST /videos          — submit a story, get a job_id back
     GET  /status/{job_id}   — check job status
     GET  /download/{job_id} — download the finished video
     GET  /jobs              — list all jobs
@@ -19,7 +19,6 @@ Example:
          -d '{"story": "Once upon a time..."}'
 """
 
-import uuid
 from pathlib import Path
 from typing import Union
 
@@ -27,13 +26,14 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from models.api_models import (
     ClipsRequest,
-    GenerateRequest,
     JobResponse,
     StatusResponse,
     StoryRequest,
 )
 
 from middleware.video_generator_middleware import VideoGeneratorMiddleware
+from utils.utils import Utils
+from models.domain_models import Job
 
 # ── App ───────────────────────────────────────────────────────────────────────
 
@@ -45,7 +45,7 @@ app = FastAPI(
 
 # ── In-memory job store ───────────────────────────────────────────────────────
 
-jobs: dict = {}
+jobs: list[Job] = []
 
 
 # ── Pipeline runner ───────────────────────────────────────────────────────────
@@ -76,13 +76,16 @@ async def generate(
     if not request.story.strip():
         raise HTTPException(status_code=400, detail="Story text cannot be empty")
 
-    job_id = str(uuid.uuid4())[:8]
-    jobs[job_id] = {
-        "status": "pending",
-        "output": None,
-        "error": None,
-        "duration": None,
-    }
+    job_id = Utils.generate_job_id(jobs)
+    jobs.append(
+        Job(
+            job_id=job_id,
+            status="pending",
+            output=None,
+            error=None,
+            duration=None,
+        )
+    )
 
     background_tasks.add_task(run_pipeline, job_id, request)
 
@@ -97,10 +100,10 @@ async def generate(
 def status(job_id: str):
     """Check the status of a generation job."""
 
-    if job_id not in jobs:
-        raise HTTPException(status_code=404, detail="Job not found")
+    job = next((j for j in jobs if j.job_id == job_id), None)
 
-    job = jobs[job_id]
+    if job == None:
+        raise HTTPException(status_code=404, detail="Job not found")
 
     return StatusResponse(job_id=job_id, **job)
 
@@ -108,17 +111,18 @@ def status(job_id: str):
 @app.get("/download/{job_id}")
 def download(job_id: str):
     """Download the finished video for a completed job."""
-    if job_id not in jobs:
+
+    job = next((j for j in jobs if j.job_id == job_id), None)
+
+    if job == None:
         raise HTTPException(status_code=404, detail="Job not found")
 
-    job = jobs[job_id]
-
-    if job["status"] != "done":
+    if job.status != "done":
         raise HTTPException(
             status_code=400, detail=f"Job is not done yet — status: {job['status']}"
         )
 
-    output_path = Path(job["output"])
+    output_path = Path(job.output)
     if not output_path.exists():
         raise HTTPException(status_code=404, detail="Output file not found")
 
@@ -134,7 +138,7 @@ def list_jobs():
     return {
         "total": len(jobs),
         "jobs": [
-            {"job_id": jid, "status": j["status"], "duration": j["duration"]}
-            for jid, j in jobs.items()
+            {"job_id": j.job_id, "status": j.status, "duration": j.duration}
+            for j in jobs
         ],
     }

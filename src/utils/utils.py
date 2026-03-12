@@ -15,6 +15,7 @@ Usage:
 import subprocess
 import sys
 from pathlib import Path
+import uuid
 
 
 class Utils:
@@ -58,3 +59,14 @@ class Utils:
             ]
         )
         return float(result.stdout.strip())
+
+    @staticmethod
+    def generate_job_id(jobs) -> str:
+        """
+        Generate a unique job ID.
+        """
+
+        while True:
+            job_id = str(uuid.uuid4())[:8]
+            if job_id not in jobs:
+                return job_id

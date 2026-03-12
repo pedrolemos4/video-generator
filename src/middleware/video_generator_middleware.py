@@ -10,37 +10,52 @@ Supported types:
     "clips"  — split video into clips + subtitles per clip
 """
 
+from typing import Union
+
+from fastapi import HTTPException
 import time
 from pathlib import Path
 
 from features.story_background import StoryBackground
+from models.api_models import ClipsRequest, StoryRequest
+from models.domain_models import Job
 
 
 class VideoGeneratorMiddleware:
 
-    def __init__(self, jobs: dict):
+    def __init__(self, jobs: list[Job]):
         self.jobs = jobs
 
-    async def run(self, job_id: str, request) -> None:
+    async def run(
+        self, job_id: str, request: Union[StoryRequest, ClipsRequest]
+    ) -> None:
         """
         Decide which pipeline to run based on request.type
         and update the job store with the result.
         """
-        self.jobs[job_id]["status"] = "running"
+
+        job = next((j for j in self.jobs if j.job_id == job_id), None)
+
+        if job == None:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+        job.status = "running"
         start = time.time()
 
         try:
             output_file = await self._dispatch(request, job_id)
 
-            self.jobs[job_id]["status"] = "done"
-            self.jobs[job_id]["output"] = str(output_file.resolve())
-            self.jobs[job_id]["duration"] = round(time.time() - start, 2)
+            job.status = "done"
+            job.output = str(output_file.resolve())
+            job.duration = round(time.time() - start, 2)
 
         except Exception as e:
-            self.jobs[job_id]["status"] = "error"
-            self.jobs[job_id]["error"] = str(e)
+            job.status = "error"
+            job.error = str(e)
 
-    async def _dispatch(self, request, job_id: str) -> Path:
+    async def _dispatch(
+        self, request: Union[StoryRequest, ClipsRequest], job_id: str
+    ) -> Path:
         """Route to the correct pipeline based on request.type."""
 
         if request.type == "story":
