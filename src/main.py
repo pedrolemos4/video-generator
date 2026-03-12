@@ -28,8 +28,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import FileResponse
 from models.api_models import GenerateRequest, JobResponse, StatusResponse
 
-from features.story_background import StoryBackground
-from utils.global_variables import Variables
+from middleware.video_generator_middleware import VideoGeneratorMiddleware
 
 # ── App ───────────────────────────────────────────────────────────────────────
 
@@ -47,27 +46,9 @@ jobs: dict = {}
 # ── Pipeline runner ───────────────────────────────────────────────────────────
 
 
-async def run_pipeline(job_id: str, request: GenerateRequest):
-    """Run the full pipeline and update job status."""
-
-    jobs[job_id]["status"] = "running"
-    start = time.time()
-
-    try:
-        pipeline = StoryBackground(
-            voice=request.voice,
-            model=request.model,
-            source_video=request.source,
-        )
-        output_file = await pipeline.run(request.story, job_id=job_id)
-
-        jobs[job_id]["status"] = "done"
-        jobs[job_id]["output"] = str(output_file.resolve())
-        jobs[job_id]["duration"] = round(time.time() - start, 2)
-
-    except Exception as e:
-        jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = str(e)
+async def run_pipeline(job_id: str, request):
+    middleware = VideoGeneratorMiddleware(jobs)
+    await middleware.run(job_id, request)
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
