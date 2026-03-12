@@ -31,6 +31,9 @@ src/
 ├── features/
 │   └── story_background.py        ← StoryBackground — full pipeline as a class
 │
+├── models/
+│   └── api_models.py         ← Models for Requests and Responses (StoryRequest, ClipsRequest, etc.)
+│
 ├── middleware/
 │   └── video_generator_middleware.py         ← VideoGeneratorMiddleware — routes requests to the right pipeline
 │
@@ -38,7 +41,6 @@ src/
 │   ├── global_variables.py        ← Variables — all default values
 │   └── utils.py                   ← Utils — log, run, get_duration
 │
-├── models.py                      ← Request and response models (StoryRequest, ClipsRequest, etc.)
 └── main.py                        ← FastAPI entry point
 ```
 
