@@ -34,9 +34,10 @@ class Merger:
                 f"[subs]drawtext=text='{title}'"
                 f":fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
                 f":fontsize=36"
-                f":fontcolor=white"
-                f":borderw=2"
-                f":bordercolor=black"
+                f":fontcolor=black"
+                f":box=1"
+                f":boxcolor=white@0.9"
+                f":boxborderw=20"
                 f":x=(w-text_w)/2"
                 f":y=(h-text_h)/2[v]"
             )

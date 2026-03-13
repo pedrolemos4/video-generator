@@ -28,11 +28,11 @@ class TTS:
         print(result.stdout)
 
     async def generate_with_padding(
-        self, story: str, title: str, output_path: Path
+        self, title: str, story: str, output_path: Path
     ) -> None:
-        f"""Generate TTS audio with {Variables.TTS_PAD_START} silence prepended."""
+        """Generate TTS audio with TTS_PAD_START silence prepended."""
         tmp_path = output_path.with_suffix(".tmp.mp3")
-        await self.generate_no_padding(story, title, tmp_path)
+        await self.generate_no_padding(title, story, tmp_path)
 
         Utils.run(
             [
@@ -54,7 +54,7 @@ class TTS:
         tmp_path.unlink()
 
     async def generate_no_padding(
-        self, story: str, title: str, output_path: Path
+        self, title: str, story: str, output_path: Path
     ) -> None:
         """Generate TTS audio with no padding."""
         import edge_tts
