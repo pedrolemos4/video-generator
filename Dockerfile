@@ -25,6 +25,9 @@ RUN pip3 install --break-system-packages -r requirements.txt
 # ── Pre-download Whisper model so it doesn't happen at runtime ────────────────
 RUN python3 -c "import whisper; whisper.load_model('small')"
 
+# ── Create voices directory (voices are downloaded at runtime by VoiceDownloader) ──
+RUN mkdir -p /app/voices
+
 # ── Copy entire project maintaining the same structure ────────────────────────
 COPY src/        ./src/
 COPY stories/    ./stories/
@@ -34,6 +37,6 @@ COPY output/     ./output/
 # ── Expose API port ───────────────────────────────────────────────────────────
 EXPOSE 8000
 
-# ── Run the API from src/_api/main.py ─────────────────────────────────────────
+# ── Run the API ───────────────────────────────────────────────────────────────
 WORKDIR /app/src
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -76,10 +76,10 @@ log "Installing whisper-ctranslate2 (faster CPU-optimised Whisper)..."
 pip3 install --break-system-packages --ignore-installed whisper-ctranslate2
 success "whisper-ctranslate2 installed"
 
-# ── 8. edge-tts ───────────────────────────────────────────────────────────────
-log "Installing edge-tts (free text-to-speech, no API key needed)..."
-pip3 install --break-system-packages --quiet edge-tts
-success "edge-tts installed"
+# ── 8. piper-tts ─────────────────────────────────────────────────────────────
+log "Installing piper-tts (local text-to-speech, no API key needed)..."
+pip3 install --break-system-packages --quiet piper-tts
+success "piper-tts installed"
 
 # ── 9. Verification ───────────────────────────────────────────────────────────
 echo ""
@@ -102,7 +102,7 @@ check "ffprobe"             "ffprobe -version"
 check "yt-dlp"              "yt-dlp --version"
 check "whisper"             "whisper --help"
 check "whisper-ctranslate2" "whisper-ctranslate2 --help"
-check "edge-tts"            "python3 -c 'import edge_tts'"
+check "piper-tts"           "python3 -c 'import piper'"
 check "Python asyncio"      "python3 -c 'import asyncio'"
 
 # ── 10. Whisper model download (optional) ────────────────────────────────────
@@ -135,12 +135,13 @@ echo -e "${GREEN}   All dependencies installed successfully!${NC}"
 echo "============================================="
 echo ""
 echo "  Next steps:"
-echo "  1. Edit VIDEO_LIST in video_story_pipeline.py"
-echo "     to point to your video files"
+echo "  1. Place your source video in videos/"
 echo ""
-echo "  2. Run the pipeline:"
-echo '     python3 video_story_pipeline.py --story "Your story here"'
+echo "  2. Start the API:"
+echo '     cd src && uvicorn main:app --host 0.0.0.0 --port 8000'
 echo ""
-echo "  3. List available TTS voices:"
-echo '     python3 video_story_pipeline.py --list-voices'
+echo "  3. Generate a video:"
+echo '     curl -X POST "http://localhost:8000/generate-video" \'
+echo '       -H "Content-Type: application/json" \'
+echo '       -d '"'"'{"story": "Your story here"}'"'"
 echo ""

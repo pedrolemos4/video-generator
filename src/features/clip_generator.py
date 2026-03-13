@@ -41,7 +41,7 @@ class ClipGenerator:
             tmp = Path(tmpdir)
 
             # ── Write bytes to a temp file so ffmpeg can read it ──────────
-            source_video = tmp / "source.mp4"  # TODO: Always the same name
+            source_video = tmp / f"video_{job_id}.mp4"
             source_video.write_bytes(video_bytes)
 
             # ── Transcribe to get word-level timestamps ───────────────────
