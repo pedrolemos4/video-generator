@@ -10,6 +10,7 @@ Supported types:
     "clips"  — split video into clips + subtitles per clip
 """
 
+import traceback
 from typing import Union
 
 from fastapi import HTTPException
@@ -19,6 +20,7 @@ from pathlib import Path
 from features.story_background import StoryBackground
 from models.api_models import ClipsRequest, StoryRequest
 from models.domain_models import Job
+from utils.utils import Utils
 
 
 class VideoGeneratorMiddleware:
@@ -52,6 +54,8 @@ class VideoGeneratorMiddleware:
         except Exception as e:
             job.status = "error"
             job.error = str(e)
+            Utils.log(f"Job {job_id} failed: {e}", "❌")
+            Utils.log(traceback.format_exc(), "🔴")
 
     # Implement new pipeline
     async def _dispatch(
@@ -65,7 +69,7 @@ class VideoGeneratorMiddleware:
                 model=request.model,
                 source_video=request.source,
             )
-            return await pipeline.run(request.story, job_id=job_id)
+            return await pipeline.run(request.title, request.story, job_id=job_id)
 
         elif request.type == "clips":
             raise NotImplementedError("clips pipeline not yet implemented")

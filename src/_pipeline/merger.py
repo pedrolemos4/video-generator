@@ -3,7 +3,6 @@
 pipeline/merger.py
 ------------------
 Final video assembly: merges video segment, TTS audio, and burned-in subtitles.
-Instantiated with subtitle style and padding so they are set once per project.
 """
 
 from pathlib import Path
@@ -14,12 +13,7 @@ from utils.global_variables import Variables
 
 class Merger:
 
-    def __init__(
-        self,
-        pad_start: float = Variables.PAD_START,
-        subtitle_style: str = Variables.SUBTITLE_STYLE,
-    ):
-        self.pad_start = pad_start
+    def __init__(self, subtitle_style: str = Variables.SUBTITLE_STYLE):
         self.subtitle_style = subtitle_style
 
     def merge(
@@ -28,18 +22,28 @@ class Merger:
         audio_path: Path,
         srt_path: Path,
         output_path: Path,
+        title: str = None,
     ) -> None:
-        """
-        Combine video segment, TTS audio, and burned-in subtitles into
-        the final output video.
-
-        Audio is delayed by pad_start seconds using -itsoffset so it starts
-        after the silent lead-in. Subtitles should already be offset by
-        pad_start (handled in Subtitles.build).
-        """
         Utils.log("Merging video + audio + subtitles into final output", "🎞")
 
         srt_abs = str(srt_path.resolve()).replace("\\", "/")
+
+        if title:
+            filter_complex = (
+                f"[0:v]subtitles='{srt_abs}':force_style='{self.subtitle_style}'[subs];"
+                f"[subs]drawtext=text='{title}'"
+                f":fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+                f":fontsize=36"
+                f":fontcolor=white"
+                f":borderw=2"
+                f":bordercolor=black"
+                f":x=(w-text_w)/2"
+                f":y=(h-text_h)/2[v]"
+            )
+        else:
+            filter_complex = (
+                f"[0:v]subtitles='{srt_abs}':force_style='{self.subtitle_style}'[v]"
+            )
 
         Utils.run(
             [
@@ -47,12 +51,10 @@ class Merger:
                 "-y",
                 "-i",
                 str(video_path),
-                "-itsoffset",
-                str(self.pad_start),
                 "-i",
                 str(audio_path),
                 "-filter_complex",
-                f"[0:v]subtitles='{srt_abs}':force_style='{self.subtitle_style}'[v]",
+                filter_complex,
                 "-map",
                 "[v]",
                 "-map",
@@ -71,5 +73,4 @@ class Merger:
             ],
             "Rendering final video",
         )
-
         Utils.log(f"Final video saved: {output_path}", "🎉")

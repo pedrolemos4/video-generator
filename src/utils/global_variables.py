@@ -22,7 +22,7 @@ class Variables:
     # Static
     SOURCE_VIDEO = "../videos/minecraft-parkour.mp4"
 
-    PAD_START = 0.5
+    TTS_PAD_START = 0.3
     PAD_END = 0.5
 
     OUTPUT_DIR = Path("../output")

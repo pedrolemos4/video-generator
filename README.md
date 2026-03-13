@@ -1,18 +1,20 @@
 # Video Story Pipeline
 
-Generates short videos from a text story. It picks a random segment from a long source video, converts the story to speech, transcribes it into subtitles, and burns everything into a final `.mp4`.
+Generates short videos from a text story. It picks a random segment from a long source video, converts the story to speech, transcribes it into subtitles, burns a title in the centre of the video, and saves everything as a final `.mp4`.
 
 ---
 
-## What the script does
+## What the pipeline does
 
-1. Reads your story text
-2. Generates a voiceover from it using `edge-tts` with SSML for expressive, human-sounding speech
-3. Transcribes the audio with Whisper to get word-level timestamps
-4. Builds an `.srt` subtitle file from the transcript
-5. Cuts a random segment from your source video — same length as the audio, plus 0.5s of silent video before and after
-6. Burns the subtitles into the video and merges the audio
-7. Saves the final `.mp4` to the `output/` folder
+1. Reads your story title and text
+2. Generates a voiceover using `edge-tts` — title spoken first, followed by a pause, then the story
+3. Prepends 0.1s of silence to the audio for a clean lead-in
+4. Transcribes the audio with Whisper to get word-level timestamps
+5. Builds an `.srt` subtitle file from the transcript
+6. Cuts a random segment from your source video — same length as the audio plus a silent tail
+7. Burns the subtitles and the title (centred, permanent) into the video
+8. Merges the audio and sends the result to Telegram
+9. Saves the final `.mp4` to the `output/` folder
 
 ---
 
@@ -21,27 +23,32 @@ Generates short videos from a text story. It picks a random segment from a long 
 ```text
 src/
 │
-├── _pipeline/                     ← reusable pipeline modules
-│   ├── merger.py                  ← Merger — merges video, audio, subtitles
-│   ├── subtitles.py               ← Subtitles — builds SRT from transcript
-│   ├── transcriber.py             ← Transcriber — Whisper transcription
-│   ├── tts.py                     ← TTS — text-to-speech with SSML
-│   └── videos.py                  ← Video — cuts random segment from source
+├── _pipeline/                          ← reusable pipeline modules
+│   ├── merger.py                       ← Merger — merges video, audio, subtitles, title
+│   ├── subtitles.py                    ← Subtitles — builds SRT from transcript
+│   ├── transcriber.py                  ← Transcriber — Whisper transcription
+│   ├── tts.py                          ← TTS — text-to-speech via edge-tts
+│   └── videos.py                       ← Video — cuts random segment from source
 │
 ├── features/
-│   └── story_background.py        ← StoryBackground — full pipeline as a class
+│   └── story_background.py             ← StoryBackground — full pipeline as a class
 │
-├── models/
-│   └── api_models.py         ← Models for Requests and Responses (StoryRequest, ClipsRequest, etc.)
+├── infrastructure/
+│   ├── piper_voice.py                  ← PiperVoice enum (unused if using edge-tts)
+│   └── voice_downloader.py             ← VoiceDownloader — downloads Piper models at startup
 │
 ├── middleware/
-│   └── video_generator_middleware.py         ← VideoGeneratorMiddleware — routes requests to the right pipeline
+│   └── video_generator_middleware.py   ← routes requests to the right pipeline
+│
+├── models/
+│   └── api_models.py                   ← StoryRequest, ClipsRequest, JobResponse, etc.
 │
 ├── utils/
-│   ├── global_variables.py        ← Variables — all default values
-│   └── utils.py                   ← Utils — log, run, get_duration
+│   ├── global_variables.py             ← Variables — all default config values
+│   ├── telegram.py                     ← Telegram — sends video to channel
+│   └── utils.py                        ← Utils — log, run, get_duration, generate_job_id
 │
-└── main.py                        ← FastAPI entry point
+└── main.py                             ← FastAPI entry point
 ```
 
 ---
@@ -64,14 +71,23 @@ source .venv/bin/activate
 ### 3. Install Python packages
 
 ```bash
-pip3 install edge-tts openai-whisper fastapi uvicorn pydantic
+pip3 install edge-tts openai-whisper fastapi uvicorn pydantic httpx python-dotenv python-multipart
+```
+
+### 4. Configure environment variables
+
+Create a `.env` file in the project root:
+
+```env
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHANNEL_ID=-1001234567890
 ```
 
 ---
 
 ## Adding your source video
 
-Place your long video (e.g. a 30min gameplay clip) at the path defined in `utils/global_variables.py`:
+Place your long video at the path defined in `utils/global_variables.py`:
 
 ```python
 SOURCE_VIDEO = "../videos/source.mp4"
@@ -81,30 +97,13 @@ The video must be longer than your story's audio — the script picks a random s
 
 ---
 
-## Adding stories
-
-Create `.txt` files inside the `stories/` folder:
-
-```text
-stories/1.txt
-stories/2.txt
-```
-
-Each file should contain plain text — no special formatting needed:
-
-```text
-The old lighthouse had been dark for thirty years. Every night, fishermen
-would navigate by memory, cursing the broken beacon that once guided them home.
-```
-
----
-
 ## How to run
 
 ### With Docker (recommended)
 
 ```bash
-./build-run-docker.sh
+./build-run-docker.sh        # Linux / Mac
+./build-run-docker.ps1       # Windows (PowerShell)
 ```
 
 ### Manually
@@ -119,53 +118,48 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 
 ## API
 
-### Submit a job
+### Submit a story job
 
 ```bash
-curl -X POST "http://localhost:8000/videos" \
+curl -X POST "http://localhost:8000/generate-video" \
   -H "Content-Type: application/json" \
-  -d '{"type": "story", "story": "Once upon a time..."}'
+  -d '{
+    "title": "The Lighthouse",
+    "story": "The old lighthouse had been dark for thirty years..."
+  }'
 ```
 
 ### Check status
 
 ```bash
-curl "http://localhost:8000/videos/{job_id}"
+curl "http://localhost:8000/status/{job_id}"
 ```
 
 ### Download the result
 
 ```bash
-curl "http://localhost:8000/videos/{job_id}/download" -o output.mp4
+curl "http://localhost:8000/download/{job_id}" -o output.mp4
 ```
 
 ### List all jobs
 
 ```bash
-curl "http://localhost:8000/videos"
+curl "http://localhost:8000/jobs"
 ```
 
 ---
 
-## Request types
+## Request fields
 
-### `story`
+### `StoryRequest`
 
-| Field | Default | Description |
-| - | - | - |
-| `type` | — | `"story"` |
-| `story` | — | Story text |
-| `voice` | `en-US-JennyNeural` | TTS voice |
-| `model` | `small` | Whisper model size |
-| `source` | `/app/videos/source.mp4` | Path to source video |
-
-### `clips` *(coming soon)*
-
-| Field | Default | Description |
-| - | - | - |
-| `type` | — | `"clips"` |
-| `source` | — | Path to the video to split |
-| `clip_duration` | `65` | Seconds per clip |
+| Field | Required | Default | Description |
+| - | - | - | - |
+| `title` | ✅ | — | Title spoken at the start and shown centred on video |
+| `story` | ✅ | — | Story text for the voiceover |
+| `voice` | — | `en-US-AriaNeural` | edge-tts voice name |
+| `model` | — | `small` | Whisper model size |
+| `source` | — | `/app/videos/source.mp4` | Path to source video |
 
 ---
 
@@ -177,34 +171,44 @@ Edit defaults in `utils/global_variables.py`:
 | - | - | - |
 | `SOURCE_VIDEO` | `/app/videos/source.mp4` | Path to source video |
 | `WHISPER_MODEL` | `small` | Whisper model size |
-| `DEFAULT_VOICE` | `en-US-JennyNeural` | TTS voice |
-| `PAD_START` | `0.5` | Seconds of silent video before audio |
+| `DEFAULT_VOICE` | `en-US-AriaNeural` | TTS voice |
 | `PAD_END` | `0.5` | Seconds of silent video after audio |
+| `TTS_PAD_START` | `0.1` | Seconds of silence prepended to TTS audio |
+| `TTS_RATE` | `+0%` | edge-tts speech rate |
+| `TTS_PITCH` | `+0Hz` | edge-tts pitch adjustment |
 | `OUTPUT_DIR` | `/app/output` | Where final videos are saved |
 | `SUBTITLE_STYLE` | Arial 22px white | ffmpeg subtitle style string |
+| `MIN_CLIP_DURATION` | `60` | Minimum clip length in seconds (clip pipeline) |
 
 ---
 
 ## Pipeline classes
 
-Each module in `_pipeline/` is independently reusable in other projects:
-
 | File | Class | Type | Responsibility |
 | - | - | - | - |
-| `tts.py` | `TTS` | Instance | Generates speech from text using SSML |
+| `tts.py` | `TTS` | Instance | Generates speech from title + story text |
 | `transcriber.py` | `Transcriber` | Instance | Transcribes audio with Whisper |
 | `subtitles.py` | `Subtitles` | Static | Builds `.srt` from transcript |
 | `videos.py` | `Video` | Instance | Cuts random segment from source video |
-| `merger.py` | `Merger` | Instance | Merges video + audio + subtitles |
+| `merger.py` | `Merger` | Instance | Merges video + audio + subtitles + title overlay |
 
 **Static** classes (`Utils`, `Subtitles`) are pure functions with no state.
 **Instance** classes (`TTS`, `Transcriber`, `Video`, `Merger`) are configured once at init and reused.
 
 ---
 
+## TTS behaviour
+
+- Title is spoken first, followed by a `...` pause, then the story
+- Short pauses are inserted after `.!?` sentence endings
+- 0.1s of silence is prepended to the audio for a clean lead-in (`TTS_PAD_START`)
+- No SSML — edge-tts uses plain text with `rate` and `pitch` parameters
+
+---
+
 ## Whisper model sizes
 
-| Model | Size | Speed on Pi | Quality |
+| Model | Size | Speed on CPU | Quality |
 | - | - | - | - |
 | `tiny` | ~74MB | Fast | Rough |
 | `base` | ~74MB | Fast | OK |
@@ -212,29 +216,7 @@ Each module in `_pipeline/` is independently reusable in other projects:
 | `medium` | ~769MB | Slow | Better |
 | `large-v3` | ~1.5GB | Very slow | Best |
 
-On a Raspberry Pi or CPU-only machine, `small` is the recommended balance. Use `base` if speed matters more than accuracy.
-
----
-
-## Output
-
-Each run saves a timestamped file to `output/`:
-
-```text
-output/story_1741234567.mp4
-```
-
-The terminal prints a summary when done:
-
-```text
-────────────────────────────────────────────────────
-  ✅  Done! Output: /app/output/story_1741234567.mp4
-  🎬  Total video:  35.50s
-  ⏱   Lead-in:      0s → 0.5s  (silent)
-  🎵  Audio+subs:   0.5s → 35.0s
-  ⏱   Tail:         35.0s → 35.5s  (silent)
-────────────────────────────────────────────────────
-```
+On a CPU-only machine or inside Docker on Mac, `small` is the recommended balance. Use `base` if speed matters more than accuracy. Note that Docker on Mac has no GPU access — run outside Docker for faster Whisper inference on Apple Silicon.
 
 ---
 
@@ -242,10 +224,14 @@ The terminal prints a summary when done:
 
 | Tool | Type | Purpose |
 | - | - | - |
-| `ffmpeg` | system (`apt`) | Video cutting, encoding, subtitle burn-in |
+| `ffmpeg` | system (`apt`) | Video cutting, encoding, subtitle burn-in, drawtext |
 | `ffprobe` | system (`apt`) | Reading video/audio duration |
+| `fonts-dejavu-core` | system (`apt`) | Font for title overlay via drawtext |
 | `edge-tts` | pip | Text-to-speech, free, no API key needed |
 | `openai-whisper` | pip | Local audio transcription |
 | `whisper-ctranslate2` | pip (optional) | Faster transcription on CPU |
 | `fastapi` | pip | API framework |
 | `uvicorn` | pip | ASGI server |
+| `httpx` | pip | Async HTTP client for Telegram |
+| `python-dotenv` | pip | Loads `.env` file at startup |
+| `python-multipart` | pip | Multipart file upload support |

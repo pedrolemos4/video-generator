@@ -25,6 +25,7 @@ class BaseVideoRequest(BaseModel):
 
 class StoryRequest(BaseVideoRequest):
     type: Literal["story"] = "story"
+    title: str
     story: str
     voice: str = Variables.DEFAULT_VOICE
     model: str = Variables.WHISPER_MODEL
@@ -32,6 +33,7 @@ class StoryRequest(BaseVideoRequest):
 
 
 class ClipsRequest(BaseVideoRequest):
+    type: Literal["clips"] = "clips"
     content: bytes
 
 

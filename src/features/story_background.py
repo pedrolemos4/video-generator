@@ -44,12 +44,10 @@ class StoryBackground:
 
         self.tts = TTS(voice=self.voice)
         self.transcriber = Transcriber(model=self.model, language="en")
-        self.video = Video(pad_start=Variables.PAD_START, pad_end=Variables.PAD_END)
-        self.merger = Merger(
-            pad_start=Variables.PAD_START, subtitle_style=Variables.SUBTITLE_STYLE
-        )
+        self.video = Video(pad_end=Variables.PAD_END)
+        self.merger = Merger(subtitle_style=Variables.SUBTITLE_STYLE)
 
-    async def run(self, story: str, job_id: str = None) -> Path:
+    async def run(self, title: str, story: str, job_id: str = None) -> Path:
         """
         Run the full pipeline for a given story.
         Returns the path to the generated video.
@@ -72,31 +70,27 @@ class StoryBackground:
             srt_file = tmp / f"{job_id}_subtitles.srt"
             output_file = Variables.OUTPUT_DIR / filename
 
-            await self.tts.generate(story, tts_audio)
+            await self.tts.generate_with_padding(title, story, tts_audio)
 
             audio_duration = Utils.get_duration(tts_audio)
             Utils.log(f"Audio duration: {audio_duration:.2f}s", "🎵")
 
             transcript = self.transcriber.transcribe(tts_audio)
-            Subtitles.build(transcript, srt_file, offset=Variables.PAD_START)
+            Subtitles.build(transcript, srt_file)
             self.video.cut_segment(self.source, audio_duration, cut_vid)
-            self.merger.merge(cut_vid, tts_audio, srt_file, output_file)
+            self.merger.merge(cut_vid, tts_audio, srt_file, output_file, title=title)
 
             await Telegram.send_video(
                 output_file, caption=f"✅ Story ready — job {job_id}"
             )
 
-            total = audio_duration + Variables.PAD_START + Variables.PAD_END
+            total = audio_duration + Variables.PAD_END
             print(f"\n{'─'*52}")
             print(f"  ✅  Done! Output: {output_file.resolve()}")
             print(f"  🎬  Total video:  {total:.2f}s")
-            print(f"  ⏱   Lead-in:      0s → {Variables.PAD_START}s  (silent)")
-            print(
-                f"  🎵  Audio+subs:   {Variables.PAD_START}s → {Variables.PAD_START + audio_duration:.2f}s"
-            )
-            print(
-                f"  ⏱   Tail:         {Variables.PAD_START + audio_duration:.2f}s → {total:.2f}s  (silent)"
-            )
+            print(f"  ⏱   Lead-in:      0s  (silent)")
+            print(f"  🎵  Audio+subs:   0s → {audio_duration:.2f}s")
+            print(f"  ⏱   Tail:         {audio_duration:.2f}s → {total:.2f}s  (silent)")
             print(f"{'─'*52}\n")
 
             return output_file

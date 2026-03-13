@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv \
     curl \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Working directory ─────────────────────────────────────────────────────────

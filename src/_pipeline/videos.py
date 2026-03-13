@@ -18,10 +18,8 @@ class Video:
 
     def __init__(
         self,
-        pad_start: float = Variables.PAD_START,
         pad_end: float = Variables.PAD_END,
     ):
-        self.pad_start = pad_start
         self.pad_end = pad_end
 
     def cut_segment(
@@ -42,7 +40,7 @@ class Video:
         Uses stream copy (-c copy): fast, lossless, no re-encoding.
         """
         source_duration = Utils.get_duration(source)
-        clip_duration = audio_duration + self.pad_start + self.pad_end
+        clip_duration = audio_duration + self.pad_end
 
         if source_duration < clip_duration:
             print(
@@ -60,7 +58,7 @@ class Video:
             f"Random cut: {cut_start:.2f}s → {cut_end:.2f}s  "
             f"| clip: {clip_duration:.2f}s  "
             f"| audio: {audio_duration:.2f}s  "
-            f"| padding: +{self.pad_start}s / +{self.pad_end}s",
+            f"| padding: +{0}s / +{self.pad_end}s",
             "✂️",
         )
 
