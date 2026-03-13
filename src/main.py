@@ -26,6 +26,7 @@ from typing import Union
 
 from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
+from infrastrucure.voice_downloader import VoiceDownloader
 from models.api_models import (
     ClipsRequest,
     JobResponse,
@@ -55,6 +56,8 @@ Variables.TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID")
 if not Variables.TELEGRAM_BOT_TOKEN or not Variables.TELEGRAM_CHANNEL_ID:
     print("ERROR: TELEGRAM_BOT_TOKEN and TELEGRAM_CHANNEL_ID must be set in .env")
     sys.exit(1)
+
+VoiceDownloader.download_all()
 
 # ── In-memory job store ───────────────────────────────────────────────────────
 

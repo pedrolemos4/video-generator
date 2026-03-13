@@ -55,7 +55,10 @@ class StoryBackground:
         Returns the path to the generated video.
         """
         if not self.source.exists():
-            print(f"ERROR: Source video not found: {source.resolve()}", file=sys.stderr)
+            print(
+                f"ERROR: Source video not found: {self.source.resolve()}",
+                file=sys.stderr,
+            )
             raise FileNotFoundError(f"Source video not found: {self.source}")
 
         Variables.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,9 +67,9 @@ class StoryBackground:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
-            tts_audio = tmp / "tts_audio.mp3"
-            cut_vid = tmp / "cut_video.mp4"
-            srt_file = tmp / "subtitles.srt"
+            tts_audio = tmp / f"{job_id}_tts_audio.wav"
+            cut_vid = tmp / f"{job_id}_cut_video.mp4"
+            srt_file = tmp / f"{job_id}_subtitles.srt"
             output_file = Variables.OUTPUT_DIR / filename
 
             await self.tts.generate(story, tts_audio)

@@ -13,6 +13,8 @@ Usage:
 
 from pathlib import Path
 
+from infrastrucure.piper_voice import PiperVoice
+
 
 class Variables:
     # Set at start
@@ -44,3 +46,5 @@ class Variables:
     )
 
     MIN_CLIP_DURATION = 60  # seconds — never cut below this
+
+    DEFAULT_VOICE = PiperVoice.EN_US_LESSAC_MEDIUM
