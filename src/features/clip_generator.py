@@ -11,22 +11,18 @@ import sys
 import tempfile
 from pathlib import Path
 
-from utils.telegram import Telegram
-
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from _pipeline.transcriber import Transcriber
 from _pipeline.subtitles import Subtitles
+from utils.telegram import Telegram
 from utils.utils import Utils
 from utils.global_variables import Variables
 
 
 class ClipGenerator:
 
-    def __init__(
-        self,
-        model: str = Variables.WHISPER_MODEL,
-    ):
+    def __init__(self, model: str = Variables.WHISPER_MODEL):
         self.model = model
         self.transcriber = Transcriber(model=self.model, language="en")
 
@@ -53,7 +49,9 @@ class ClipGenerator:
             Utils.log(f"Found {len(cut_points)} cut points", "✂️")
 
             # ── Cut clips and burn subtitles ──────────────────────────────
-            output_files = []
+            output_files: list[Path] = []
+            total = len(cut_points)
+
             for idx, (start, end) in enumerate(cut_points, start=1):
                 clip_num = f"{idx:02d}"
                 clip_video = tmp / f"clip_{clip_num}.mp4"
@@ -110,7 +108,7 @@ class ClipGenerator:
 
                 await Telegram.send_video(
                     output_file,
-                    caption=f"🎬 Clip {clip_num}/{len(cut_points)} — job {job_id}",
+                    caption=f"🎬 Clip {clip_num}/{total} — job {job_id}",
                 )
 
             return output_files
@@ -121,7 +119,7 @@ class ClipGenerator:
         (. ! ?) that occur after MIN_CLIP_DURATION seconds from the
         last cut. Never cuts mid-sentence.
         """
-        all_words = [
+        all_words: list[dict] = [
             word
             for segment in transcript.get("segments", [])
             for word in segment.get("words", [])
@@ -131,15 +129,14 @@ class ClipGenerator:
         if not all_words:
             return []
 
-        total_duration = all_words[-1]["end"]
-        cut_points = []
-        clip_start = all_words[0]["start"]
+        total_duration: float = all_words[-1]["end"]
+        cut_points: list[tuple[float, float]] = []
+        clip_start: float = all_words[0]["start"]
 
         for word in all_words:
-            word_end = word.get("end", 0)
-            word_text = word.get("word", "").strip()
-
-            elapsed = word_end - clip_start
+            word_end: float = word.get("end", 0.0)
+            word_text: str = word.get("word", "").strip()
+            elapsed: float = word_end - clip_start
 
             # Only consider cutting after MIN_CLIP_DURATION seconds
             # and only at sentence-ending punctuation
@@ -162,13 +159,13 @@ class ClipGenerator:
         Return a copy of the transcript containing only words
         that fall within [start, end].
         """
-        sliced_segments = []
+        sliced_segments: list[dict] = []
 
         for segment in transcript.get("segments", []):
-            sliced_words = [
+            sliced_words: list[dict] = [
                 word
                 for word in segment.get("words", [])
-                if word.get("start", 0) >= start and word.get("end", 0) <= end
+                if word.get("start", 0.0) >= start and word.get("end", 0.0) <= end
             ]
             if sliced_words:
                 sliced_segments.append({**segment, "words": sliced_words})
