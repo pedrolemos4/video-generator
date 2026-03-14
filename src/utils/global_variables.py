@@ -20,8 +20,8 @@ class Variables:
     TELEGRAM_CHANNEL_ID = ""
 
     # Static
-    ACRONYM = "ST"
-    USERNAME = "Story Telling"
+    ACRONYM = "SH"
+    USERNAME = "The Story Hub"
 
     SOURCE_VIDEO = "../videos/minecraft-parkour.mp4"
 
