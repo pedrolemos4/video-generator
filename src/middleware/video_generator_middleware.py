@@ -17,7 +17,6 @@ from fastapi import HTTPException
 import time
 from pathlib import Path
 
-from features.clip_generator import ClipGenerator
 from features.story_background import StoryBackground
 from models.api_models import ClipsRequest, StoryRequest
 from models.domain_models import Job
@@ -71,10 +70,6 @@ class VideoGeneratorMiddleware:
                 source_video=request.source,
             )
             return await pipeline.run(request.title, request.story, job_id=job_id)
-
-        elif request.type == "clips":
-            pipeline = ClipGenerator(model=request.model)
-            return await pipeline.run(request.content, job_id=job_id)
 
         else:
             raise ValueError(f"Unknown video type: '{request.type}'")
