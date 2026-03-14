@@ -1,7 +1,6 @@
 # =============================================================================
 # Dockerfile — Video Story Pipeline API
 # =============================================================================
-
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -23,18 +22,18 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip3 install --break-system-packages -r requirements.txt
 
+# ── Install Playwright and Chromium ──────────────────────────────────────────
+RUN playwright install chromium --with-deps
+
 # ── Pre-download Whisper model so it doesn't happen at runtime ────────────────
 RUN python3 -c "import whisper; whisper.load_model('small')"
 
 # ── Copy entire project maintaining the same structure ────────────────────────
-COPY src/        ./src/
-COPY stories/    ./stories/
-COPY videos/     ./videos/
-COPY output/     ./output/
+COPY src/ ./src/
 
 # ── Expose API port ───────────────────────────────────────────────────────────
 EXPOSE 8000
 
-# ── Run the API from src/_api/main.py ─────────────────────────────────────────
+# ── Run the API ───────────────────────────────────────────────────────────────
 WORKDIR /app/src
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

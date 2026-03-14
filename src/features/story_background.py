@@ -78,7 +78,9 @@ class StoryBackground:
             transcript = self.transcriber.transcribe(tts_audio)
             Subtitles.build(transcript, srt_file)
             self.video.cut_segment(self.source, audio_duration, cut_vid)
-            self.merger.merge(cut_vid, tts_audio, srt_file, output_file, title=title)
+            await self.merger.merge(
+                cut_vid, tts_audio, srt_file, output_file, title=title
+            )
 
             await Telegram.send_video(
                 output_file, caption=f"✅ Story ready — job {job_id}"

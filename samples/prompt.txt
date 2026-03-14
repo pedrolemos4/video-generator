@@ -1,0 +1,4 @@
+This story generates a 10sec video, generate one that has around 1min20sec. It has to be about betrayals and cheating. Make the story personal by adding a central reference point to the story and details about the people involved, not too much as they must keep anonymous '#!/bin/bash
+curl -X POST "http://localhost:8000/generate-video" \
+-H "Content-Type: application/json" \
+-d '{"title": "The Lighthouse", "type": "story", "story": "The old lighthouse had been dark for thirty years. Every night, fishermen would navigate by memory, cursing the broken beacon that once guided them home."}''

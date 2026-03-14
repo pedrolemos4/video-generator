@@ -20,7 +20,13 @@ class Variables:
     TELEGRAM_CHANNEL_ID = ""
 
     # Static
+    ACRONYM = "ST"
+    USERNAME = "Story Telling"
+
     SOURCE_VIDEO = "../videos/minecraft-parkour.mp4"
+
+    TITLE_WIDTH = 2000
+    TITLE_HEIGHT = 900
 
     TTS_PAD_START = 0.3
     PAD_END = 0.5
@@ -32,7 +38,7 @@ class Variables:
     DEFAULT_VOICE = "en-US-AriaNeural"
 
     SUBTITLE_STYLE = (
-        "FontSize=22,"
+        "FontSize=16,"
         "FontName=Arial,"
         "Bold=1,"
         "PrimaryColour=&H00FFFFFF,"

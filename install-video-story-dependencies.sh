@@ -81,7 +81,13 @@ log "Installing edge-tts (free text-to-speech, no API key needed)..."
 pip3 install --break-system-packages --quiet edge-tts
 success "edge-tts installed"
 
-# ── 9. Verification ───────────────────────────────────────────────────────────
+# ── 9. playwright ─────────────────────────────────────────────────────────────
+log "Installing playwright (headless browser for title card rendering)..."
+pip3 install --break-system-packages --quiet playwright
+playwright install chromium --with-deps
+success "playwright installed"
+
+# ── 10. Verification ───────────────────────────────────────────────────────────
 echo ""
 echo "============================================="
 echo "   Verification"

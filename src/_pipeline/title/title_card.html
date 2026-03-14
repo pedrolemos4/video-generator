@@ -1,0 +1,117 @@
+<html>
+
+<head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 2000px;
+            min-height: 900px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        }
+
+        .card {
+            width: 1950px;
+            background: white;
+            border-radius: 40px;
+            padding: 64px 72px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+            margin-bottom: 40px;
+        }
+
+        .avatar {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 64px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .handle-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .handle {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 64px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .verified {
+            width: 60px;
+            height: 60px;
+            background: #1d9bf0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .verified::after {
+            content: "✓";
+            color: white;
+            font-size: 38px;
+            font-weight: bold;
+        }
+
+        .views {
+            font-size: 52px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .story-text {
+            font-size: 80px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="avatar">ST</div>
+            <div class="handle-row">
+                <div class="handle">
+                    @{{username}}
+                    <div class="verified"></div>
+                </div>
+                <div class="views">👁 {{views}}</div>
+            </div>
+        </div>
+        <div class="story-text">{{title}}</div>
+    </div>
+</body>
+
+</html>

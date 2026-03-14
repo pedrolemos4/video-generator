@@ -9,3 +9,4 @@ src/.env
 __pycache__/
 output/
 videos/
+.vscode/PythonImportHelper-v2-Completion.json
