@@ -23,7 +23,10 @@ class Utils:
     @staticmethod
     def log(msg: str, emoji: str = "▶") -> None:
         """Print a styled log message to stdout."""
-        print(f"\n{emoji}  {msg}", flush=True)
+        from datetime import datetime
+
+        timestamp = datetime.now().strftime("%M:%S")
+        print(f"\n{emoji}  [{timestamp}] {msg}", flush=True)
 
     @staticmethod
     def run(cmd: list, desc: str = "") -> subprocess.CompletedProcess:

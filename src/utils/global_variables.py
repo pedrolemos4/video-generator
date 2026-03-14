@@ -37,8 +37,9 @@ class Variables:
 
     DEFAULT_VOICE = "en-US-AriaNeural"
 
+    SUBTITLE_FONT_SIZE = 12
     SUBTITLE_STYLE = (
-        "FontSize=16,"
+        f"FontSize={SUBTITLE_FONT_SIZE},"
         "FontName=Arial,"
         "Bold=1,"
         "PrimaryColour=&H00FFFFFF,"

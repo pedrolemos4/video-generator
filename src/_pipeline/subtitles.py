@@ -29,7 +29,7 @@ class Subtitles:
         transcript: dict,
         output_path: Path,
         offset: float = 0.0,
-        words_per_line: int = 8,
+        words_per_line: int = 5,
     ) -> None:
         """
         Build an SRT file from Whisper JSON transcript output.
