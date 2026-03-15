@@ -23,8 +23,6 @@ class Variables:
     ACRONYM = "SH"
     USERNAME = "The Story Hub"
 
-    SOURCE_VIDEO = "../videos/minecraft-parkour.mp4"
-
     TITLE_WIDTH = 2000
     TITLE_HEIGHT = 900
 
@@ -35,7 +33,26 @@ class Variables:
 
     WHISPER_MODEL = "small"
 
+    DEFAULT_SOURCE_VIDEO = "../videos/minecraft-parkour-1.mp4"
+    BACKGROUND_VIDEOS = [
+        DEFAULT_SOURCE_VIDEO,
+        "../videos/minecraft-parkour-2.mp4",
+        "../videos/csgo-surf-1.mp4",
+    ]
+
     DEFAULT_VOICE = "en-US-AriaNeural"
+    VOICES = [
+        DEFAULT_VOICE,  # Female, expressive & natural
+        "en-US-ChristopherNeural",  # Male, deep & authoritative
+        "en-US-EricNeural",  # Male, calm & clear
+        "en-US-GuyNeural",  # Male, natural & warm
+        "en-US-JennyNeural",  # Female, friendly & conversational
+        "en-US-MichelleNeural",  # Female, warm & engaging
+        "en-GB-RyanNeural",  # Male British, smooth & cinematic
+        "en-GB-SoniaNeural",  # Female British, clear & elegant
+        "en-AU-WilliamNeural",  # Male Australian, relaxed & deep
+        "en-AU-NatashaNeural",  # Female Australian, warm & natural
+    ]
 
     SUBTITLE_FONT_SIZE = 12
     SUBTITLE_STYLE = (

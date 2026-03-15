@@ -65,10 +65,13 @@ class VideoGeneratorMiddleware:
         """Route to the correct pipeline based on request.type."""
 
         if request.type == "story":
+            voice = Utils.pick_voice()
+            background_video = Utils.pick_background_video()
+
             pipeline = StoryBackground(
-                voice=request.voice,
+                voice=voice,
                 model=request.model,
-                source_video=request.source,
+                source_video=background_video,
             )
             return await pipeline.run(request.title, request.story, job_id=job_id)
 

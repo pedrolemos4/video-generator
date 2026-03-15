@@ -27,9 +27,6 @@ class StoryRequest(BaseVideoRequest):
     type: Literal["story"] = "story"
     title: str
     story: str
-    voice: str = Variables.DEFAULT_VOICE
-    model: str = Variables.WHISPER_MODEL
-    source: str = Variables.SOURCE_VIDEO
 
 
 class ClipsRequest(BaseVideoRequest):

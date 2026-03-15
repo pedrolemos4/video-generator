@@ -36,7 +36,7 @@ class StoryBackground:
         self,
         voice: str = Variables.DEFAULT_VOICE,
         model: str = Variables.WHISPER_MODEL,
-        source_video: str = Variables.SOURCE_VIDEO,
+        source_video: str = Variables.DEFAULT_SOURCE_VIDEO,
     ):
         self.voice = voice
         self.model = model
@@ -111,7 +111,7 @@ def main():
     )
     parser.add_argument("--voice", type=str, default=Variables.DEFAULT_VOICE)
     parser.add_argument("--model", type=str, default=Variables.WHISPER_MODEL)
-    parser.add_argument("--source", type=str, default=Variables.SOURCE_VIDEO)
+    parser.add_argument("--source", type=str, default=Variables.DEFAULT_SOURCE_VIDEO)
     parser.add_argument("--list-voices", action="store_true")
 
     args = parser.parse_args()

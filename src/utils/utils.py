@@ -12,10 +12,13 @@ Usage:
     duration = Pipeline.get_duration(Path("video.mp4"))
 """
 
+import datetime
 import subprocess
 import sys
 from pathlib import Path
 import uuid
+
+from utils.global_variables import Variables
 
 
 class Utils:
@@ -73,3 +76,21 @@ class Utils:
             job_id = str(uuid.uuid4())[:8]
             if job_id not in jobs:
                 return job_id
+
+    @staticmethod
+    def _build_seed() -> int:
+        """Build a persistent seed from current month, day, hour, and minute."""
+        now = datetime.now()
+        return int(f"{now.month:02}{now.day:02}{now.hour:02}{now.minute:02}")
+
+    @staticmethod
+    def pick_voice() -> str:
+        seed = Utils._build_seed()
+        return Variables.VOICES[seed % len(Variables.VOICES)]
+
+    @staticmethod
+    def pick_background_video() -> str:
+        seed = Utils._build_seed()
+        return Variables.BACKGROUND_VIDEOS[
+            (seed // 10) % len(Variables.BACKGROUND_VIDEOS)
+        ]
