@@ -1,6 +1,6 @@
 # Video Story Pipeline
 
-Generates short videos from a text story. It picks a random segment from a long source video, converts the story to speech, transcribes it into subtitles, burns a title in the centre of the video, and saves everything as a final `.mp4`.
+Generates short vertical videos from a text story. Picks a random segment from a long source video, converts the story to speech, transcribes it into subtitles, renders an HTML title card, and burns everything into a final `.mp4`.
 
 ---
 
@@ -8,13 +8,14 @@ Generates short videos from a text story. It picks a random segment from a long 
 
 1. Reads your story title and text
 2. Generates a voiceover using `edge-tts` — title spoken first, followed by a pause, then the story
-3. Prepends 0.1s of silence to the audio for a clean lead-in
+3. Prepends a short silence to the audio for a clean lead-in
 4. Transcribes the audio with Whisper to get word-level timestamps
 5. Builds an `.srt` subtitle file from the transcript
 6. Cuts a random segment from your source video — same length as the audio plus a silent tail
-7. Burns the subtitles and the title (centred, permanent) into the video
-8. Merges the audio and sends the result to Telegram
-9. Saves the final `.mp4` to the `output/` folder
+7. Renders an HTML title card to PNG using Playwright
+8. Overlays the title card centred on the video for the first 10 seconds
+9. Burns the subtitles into the video
+10. Merges the audio, sends the result to Telegram, and saves the final `.mp4`
 
 ---
 
@@ -24,18 +25,16 @@ Generates short videos from a text story. It picks a random segment from a long 
 src/
 │
 ├── _pipeline/                          ← reusable pipeline modules
-│   ├── merger.py                       ← Merger — merges video, audio, subtitles, title
+│   ├── merger.py                       ← Merger — merges video, audio, subtitles, title card
 │   ├── subtitles.py                    ← Subtitles — builds SRT from transcript
+│   ├── title_card.html                 ← HTML template for the title card overlay
+│   ├── title_card.py                   ← TitleCard — renders HTML to PNG via Playwright
 │   ├── transcriber.py                  ← Transcriber — Whisper transcription
 │   ├── tts.py                          ← TTS — text-to-speech via edge-tts
 │   └── videos.py                       ← Video — cuts random segment from source
 │
 ├── features/
 │   └── story_background.py             ← StoryBackground — full pipeline as a class
-│
-├── infrastructure/
-│   ├── piper_voice.py                  ← PiperVoice enum (unused if using edge-tts)
-│   └── voice_downloader.py             ← VoiceDownloader — downloads Piper models at startup
 │
 ├── middleware/
 │   └── video_generator_middleware.py   ← routes requests to the right pipeline
@@ -45,7 +44,7 @@ src/
 │
 ├── utils/
 │   ├── global_variables.py             ← Variables — all default config values
-│   ├── telegram.py                     ← Telegram — sends video to channel
+│   ├── telegram.py                     ← Telegram — sends video or notification to channel
 │   └── utils.py                        ← Utils — log, run, get_duration, generate_job_id
 │
 └── main.py                             ← FastAPI entry point
@@ -71,7 +70,8 @@ source .venv/bin/activate
 ### 3. Install Python packages
 
 ```bash
-pip3 install edge-tts openai-whisper fastapi uvicorn pydantic httpx python-dotenv python-multipart
+pip3 install edge-tts openai-whisper fastapi uvicorn pydantic httpx python-dotenv python-multipart playwright
+playwright install chromium
 ```
 
 ### 4. Configure environment variables
@@ -93,7 +93,11 @@ Place your long video at the path defined in `utils/global_variables.py`:
 SOURCE_VIDEO = "../videos/source.mp4"
 ```
 
-The video must be longer than your story's audio — the script picks a random segment each run.
+The video must be longer than your story's audio. The pipeline picks a random segment each run. Supported formats: `.mp4`. To convert a `.mov`:
+
+```bash
+ffmpeg -i input.mov -c copy output.mp4
+```
 
 ---
 
@@ -114,6 +118,8 @@ cd src
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
+> **Note:** Docker on Mac has no GPU access. Run outside Docker for faster Whisper inference on Apple Silicon (M1/M2/M3).
+
 ---
 
 ## API
@@ -124,9 +130,18 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 curl -X POST "http://localhost:8000/generate-video" \
   -H "Content-Type: application/json" \
   -d '{
-    "title": "The Lighthouse",
-    "story": "The old lighthouse had been dark for thirty years..."
+    "title": "I ended up in my neighbors will",
+    "type": "story",
+    "story": "Your story text here..."
   }'
+```
+
+### Upload a video for clipping
+
+```bash
+VIDEO="./videos/video.mp4"
+curl -X POST "http://localhost:8000/upload-video" \
+  -F "file=@${VIDEO}"
 ```
 
 ### Check status
@@ -155,11 +170,8 @@ curl "http://localhost:8000/jobs"
 
 | Field | Required | Default | Description |
 | - | - | - | - |
-| `title` | ✅ | — | Title spoken at the start and shown centred on video |
+| `title` | ✅ | — | Title spoken at the start and shown as overlay for 10s |
 | `story` | ✅ | — | Story text for the voiceover |
-| `voice` | — | `en-US-AriaNeural` | edge-tts voice name |
-| `model` | — | `small` | Whisper model size |
-| `source` | — | `/app/videos/source.mp4` | Path to source video |
 
 ---
 
@@ -177,7 +189,7 @@ Edit defaults in `utils/global_variables.py`:
 | `TTS_RATE` | `+0%` | edge-tts speech rate |
 | `TTS_PITCH` | `+0Hz` | edge-tts pitch adjustment |
 | `OUTPUT_DIR` | `/app/output` | Where final videos are saved |
-| `SUBTITLE_STYLE` | Arial 22px white | ffmpeg subtitle style string |
+| `SUBTITLE_STYLE` | Arial 12px white | ffmpeg subtitle style string |
 | `MIN_CLIP_DURATION` | `60` | Minimum clip length in seconds (clip pipeline) |
 
 ---
@@ -190,9 +202,10 @@ Edit defaults in `utils/global_variables.py`:
 | `transcriber.py` | `Transcriber` | Instance | Transcribes audio with Whisper |
 | `subtitles.py` | `Subtitles` | Static | Builds `.srt` from transcript |
 | `videos.py` | `Video` | Instance | Cuts random segment from source video |
-| `merger.py` | `Merger` | Instance | Merges video + audio + subtitles + title overlay |
+| `merger.py` | `Merger` | Instance | Merges video + audio + subtitles + title card |
+| `title_card.py` | `TitleCard` | Static | Renders HTML title card to PNG |
 
-**Static** classes (`Utils`, `Subtitles`) are pure functions with no state.
+**Static** classes (`Utils`, `Subtitles`, `TitleCard`) are pure functions with no state.
 **Instance** classes (`TTS`, `Transcriber`, `Video`, `Merger`) are configured once at init and reused.
 
 ---
@@ -200,9 +213,28 @@ Edit defaults in `utils/global_variables.py`:
 ## TTS behaviour
 
 - Title is spoken first, followed by a `...` pause, then the story
-- Short pauses are inserted after `.!?` sentence endings
-- 0.1s of silence is prepended to the audio for a clean lead-in (`TTS_PAD_START`)
-- No SSML — edge-tts uses plain text with `rate` and `pitch` parameters
+- Short pauses (`..`) are inserted after `.!?` sentence endings
+- `TTS_PAD_START` seconds of silence are prepended to the audio for a clean lead-in
+- No SSML — edge-tts receives plain preprocessed text with optional `rate` and `pitch` parameters
+
+---
+
+## Title card
+
+- Designed in `_pipeline/title_card.html` — edit freely with any HTML/CSS
+- Rendered to PNG at runtime using Playwright (headless Chromium)
+- Uses `{{title}}`, `{{username}}` and `{{views}}` as placeholders
+- Views are randomised between 100,000 and 1,000,000 on each run
+- Overlaid centred on the video for the first 10 seconds, then disappears
+- Transparent background — only the white card is visible over the video
+
+---
+
+## Telegram
+
+- Videos under 50MB are sent directly
+- Videos over 50MB trigger a text notification instead: `Video is ready but too large to send`
+- Logs timestamps in Porto, Portugal time (Europe/Lisbon)
 
 ---
 
@@ -216,20 +248,18 @@ Edit defaults in `utils/global_variables.py`:
 | `medium` | ~769MB | Slow | Better |
 | `large-v3` | ~1.5GB | Very slow | Best |
 
-On a CPU-only machine or inside Docker on Mac, `small` is the recommended balance. Use `base` if speed matters more than accuracy. Note that Docker on Mac has no GPU access — run outside Docker for faster Whisper inference on Apple Silicon.
-
 ---
 
 ## Dependencies
 
 | Tool | Type | Purpose |
 | - | - | - |
-| `ffmpeg` | system (`apt`) | Video cutting, encoding, subtitle burn-in, drawtext |
-| `ffprobe` | system (`apt`) | Reading video/audio duration |
-| `fonts-dejavu-core` | system (`apt`) | Font for title overlay via drawtext |
+| `ffmpeg` / `ffprobe` | system (`apt`) | Video cutting, encoding, subtitle burn-in, overlay |
+| `fonts-dejavu-core` | system (`apt`) | Font for ffmpeg filters |
 | `edge-tts` | pip | Text-to-speech, free, no API key needed |
 | `openai-whisper` | pip | Local audio transcription |
 | `whisper-ctranslate2` | pip (optional) | Faster transcription on CPU |
+| `playwright` | pip | Headless Chromium for title card rendering |
 | `fastapi` | pip | API framework |
 | `uvicorn` | pip | ASGI server |
 | `httpx` | pip | Async HTTP client for Telegram |
