@@ -27,8 +27,9 @@ class Utils:
     def log(msg: str, emoji: str = "▶") -> None:
         """Print a styled log message to stdout."""
         from datetime import datetime
+        import zoneinfo
 
-        timestamp = datetime.now().strftime("%M:%S")
+        timestamp = datetime.now(zoneinfo.ZoneInfo("Europe/Lisbon")).strftime("%H:%M")
         print(f"\n{emoji}  [{timestamp}] {msg}", flush=True)
 
     @staticmethod
