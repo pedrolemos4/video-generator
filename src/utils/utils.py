@@ -12,7 +12,7 @@ Usage:
     duration = Pipeline.get_duration(Path("video.mp4"))
 """
 
-import datetime
+from datetime import datetime
 import subprocess
 import sys
 from pathlib import Path

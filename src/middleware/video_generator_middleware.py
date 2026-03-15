@@ -22,6 +22,7 @@ from features.story_background import StoryBackground
 from models.api_models import ClipsRequest, StoryRequest
 from models.domain_models import Job
 from utils.utils import Utils
+from utils.global_variables import Variables
 
 
 class VideoGeneratorMiddleware:
@@ -70,7 +71,7 @@ class VideoGeneratorMiddleware:
 
             pipeline = StoryBackground(
                 voice=voice,
-                model=request.model,
+                model=Variables.WHISPER_MODEL,
                 source_video=background_video,
             )
             return await pipeline.run(request.title, request.story, job_id=job_id)
