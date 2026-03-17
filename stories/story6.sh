@@ -1,0 +1,9 @@
+#!/bin/bash
+
+curl -X POST "http://localhost:8000/generate-video" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Am I the a-hole for ruining my sisters wedding wearing the dress she chose for me?",
+    "type": "story",
+    "story": "My sister Chloe got married last weekend. Chloe has always been a perfectionist but she went into full bridezilla mode during the planning. For her bridesmaids she chose a very specific dress, a floor length silk gown in a shade she called Sunset Champagne. The problem is I am very fair skinned with blonde hair. When I tried the sample on I looked completely washed out, almost like a ghost. I mentioned this to Chloe months ago but she snapped and said the aesthetic of the photos was more important than my complexion. I bought the dress, had it tailored, and showed up on the wedding day. When Chloe saw me in the full hair and makeup she had also mandated, she turned pale. In the natural light the dress almost perfectly matched my skin tone, making it look like I was naked from a distance, especially in the bright sun of the outdoor ceremony. During the reception, the new mother in law made a comment about how bold my choice of attire was. Chloe lost it. She accused me of malicious compliance and claimed I should have known the dress would look scandalous on me and secretly bought a different shade or added a wrap. She is now demanding I pay for professional photo editing to change the color of my dress in all the wedding shots because I ruined the focal point of the ceremony. My parents are split. My dad thinks Chloe is being insane but my mom says I should have used common sense and pushed harder to change the dress earlier. I told her I wore exactly what she told me to wear and I am not paying a cent. Now she has told the rest of the bridal party I am a saboteur. Am I the a-hole for wearing the exact dress the bride picked out?"
+  }'
