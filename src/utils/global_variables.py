@@ -33,11 +33,11 @@ class Variables:
 
     WHISPER_MODEL = "small"
 
-    DEFAULT_SOURCE_VIDEO = "../videos/minecraft-parkour-1.mp4"
+    DEFAULT_SOURCE_VIDEO = "../videos/csgo-surf-1.mp4"
     BACKGROUND_VIDEOS = [
         DEFAULT_SOURCE_VIDEO,
+        "../videos/minecraft-parkour-1.mp4",
         "../videos/minecraft-parkour-2.mp4",
-        "../videos/csgo-surf-1.mp4",
     ]
 
     DEFAULT_VOICE = "en-US-AriaNeural"
