@@ -106,7 +106,7 @@ class ClipGenerator:
                 output_files.append(output_file)
                 Utils.log(f"Clip {clip_num} saved: {output_file}", "✅")
 
-                await Telegram.send_video(
+                await Telegram.send_message(
                     output_file,
                     caption=f"🎬 Clip {clip_num}/{total} — job {job_id}",
                 )

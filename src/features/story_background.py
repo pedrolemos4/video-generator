@@ -74,6 +74,16 @@ class StoryBackground:
 
             audio_duration = Utils.get_duration(tts_audio)
             Utils.log(f"Audio duration: {audio_duration:.2f}s", "🎵")
+            if audio_duration > 180:
+                Utils.log(
+                    f"Error: Generated audio is {audio_duration:.2f}s long, which exceeds the 3-minute limit. Job {job_id} cancelled",
+                    "❌",
+                )
+                await Telegram.send_message(
+                    None,
+                    caption=f"❌ Error: Generated audio is {audio_duration:.2f}s long, which exceeds the 3-minute limit. Job {job_id} cancelled",
+                )
+                return
 
             transcript = self.transcriber.transcribe(tts_audio)
             Subtitles.build(transcript, srt_file)
@@ -82,7 +92,7 @@ class StoryBackground:
                 cut_vid, tts_audio, srt_file, output_file, title=title
             )
 
-            await Telegram.send_video(
+            await Telegram.send_message(
                 output_file, caption=f"✅ Story ready — job {job_id}"
             )
 
