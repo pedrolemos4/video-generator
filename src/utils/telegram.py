@@ -1,8 +1,8 @@
 # utils/telegram.py
 import httpx
 from pathlib import Path
-from utils.global_variables import Variables
 from utils.utils import Utils
+from utils.global_variables import Variables
 
 
 class Telegram:
@@ -20,32 +20,13 @@ class Telegram:
             else:
                 Utils.log(f"Message sent to Telegram", "📤")
         else:
-            size_mb = video_path.stat().st_size / (1024 * 1024)
-
-            if size_mb > 50:
-                Utils.log(
-                    f"Video is {size_mb:.2f}MB — too large for Telegram, sending notification instead",
-                    "⚠️",
-                )
-                await Telegram._send_message(
-                    f"✅ Video is ready but too large to send ({size_mb:.1f}MB).\n\n{caption}"
-                )
-                return
-
-            url = (
-                f"https://api.telegram.org/bot{Variables.TELEGRAM_BOT_TOKEN}/sendVideo"
+            Utils.log(
+                f"Video is {video_path.stat().st_size / (1024 * 1024):.2f}MB — too large for Telegram, sending notification instead",
+                "⚠️",
             )
-
-            async with httpx.AsyncClient(timeout=120) as client:
-                with open(video_path, "rb") as f:
-                    response = await client.post(
-                        url,
-                        data={
-                            "chat_id": Variables.TELEGRAM_CHANNEL_ID,
-                            "caption": caption,
-                        },
-                        files={"video": f},
-                    )
+            await Telegram._send_message(
+                f"✅ Video is ready but too large to send ({video_path.stat().st_size / (1024 * 1024):.1f}MB).\n\n{caption}"
+            )
 
             if response.status_code != 200:
                 Utils.log(

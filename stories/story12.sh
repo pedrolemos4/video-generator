@@ -1,0 +1,9 @@
+#!/bin/bash
+
+curl -X POST "http://localhost:8000/generate-video" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "My best friend slept with my boyfriend so I exposed them both at her birthday party",
+    "type": "story",
+    "story": "I am 20 and I had this best friend, 21, since high school. We did everything together. Sleepovers, road trips, even picked the same college so we would not be apart. I trusted her with literally everything in my life. Then one day I noticed she was acting weird around my boyfriend. At first I brushed it off as paranoia. Until I caught a glimpse of his phone. There were messages from her. Things like, Do not tell her about us. And, When are you leaving her for me. It felt like my whole world shattered. My best friend and my boyfriend. Behind my back. I wanted to explode but instead I stayed calm and started planning. For weeks I let them think I did not know. I still hung out with her, smiled at him, and pretended everything was normal while collecting proof. Screenshots, pictures, even recordings of them together. Then came her 21st birthday party. She had this huge celebration planned and she asked me to make a slideshow of our friendship. I said yes. On the night of the party everyone gathered around to watch the big presentation. The slideshow started sweet. Photos of us as kids, vacations, memories. But halfway through the pictures changed. Suddenly it was screenshots of her texts with my boyfriend. Videos of them sneaking around. Receipts of hotel bookings. The room went silent. She screamed, my boyfriend tried to grab the laptop, and everyone just stared in shock. Her parents kicked him out, her friends abandoned her, and she stood there humiliated in front of everyone she loved. I did not say a word. I just walked out of the party and never looked back. Losing me as a friend was one thing. But losing her reputation. That was the revenge she never saw coming."
+  }'
