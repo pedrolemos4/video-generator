@@ -24,7 +24,7 @@ class Telegram:
                 f"Video is {video_path.stat().st_size / (1024 * 1024):.2f}MB — too large for Telegram, sending notification instead",
                 "⚠️",
             )
-            await Telegram._send_message(
+            response = await Telegram._send_message(
                 f"✅ Video is ready but too large to send ({video_path.stat().st_size / (1024 * 1024):.1f}MB).\n\n{caption}"
             )
 
