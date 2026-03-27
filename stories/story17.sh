@@ -1,0 +1,9 @@
+#!/bin/bash
+
+curl -X POST "http://localhost:8000/generate-video" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "title": "$1.29 made her smile",
+        "type": "story",
+        "story": "I do not know if this is the right place but I have to share this with someone. Today at the gas station I watched as a mother counted out change to make a purchase for herself and her 2 children. They were struggling, to be blunt. I have seen and lived that situation before. The little girl is what I really took notice of. She was not happy and wanted something else. I knew the lie the mother was telling her kids. The lost my debit card excuse, just to save face in front of her children. I get it. Protecting the ones you love and not letting them see the hard reality in the background. I made my purchase and went to my truck. I sat there and watched as the little girl did not want to leave. She wanted her item. I checked my bank account as I sat there watching the family. I had $23 to my name. The brother and mother were literally trying to usher this little girl out of the store. I had to do something. I went back inside. I talked to the mother and asked her permission to buy something for her daughter. The little girl was given the green light to make her selection. She picked popcorn. She was standing right next to the candy. Well that little girl is better than me. The popcorn cost $1.29. I got $20 cash back and handed the mother the bag of popcorn and the money. I may have $1.95 in my bank account now. That $20 would not make my own situation better today or tomorrow. I can only hope it made a difference to that mother. Sometimes the smallest things are the ones that matter most."
+    }'
