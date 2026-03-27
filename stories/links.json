@@ -1,4 +1,11 @@
 [
+    ,
+    {
+        "id": "story",
+        "title": "",
+        "description": "",
+        "link": ""
+    },
     {
         "id": "story1",
         "title": "My neighbor’s husband left today and it turned into a full-on daytime soap opera.",
@@ -94,5 +101,17 @@
         "title": "My coworker kept criticizing my work in front of the boss, so one day I just let him do the whole thing himself",
         "description": "For months he told everyone he could do it better. Then I gave him the chance. 💀 #storytime #fyp #work #karma #satisfying",
         "link": "https://www.reddit.com/r/story/comments/1rnjvy3/my_coworker_kept_criticizing_my_work_in_front_of/"
+    },
+    {
+        "id": "story17",
+        "title": "$1.29 made her smile",
+        "description": "A little girl would not leave the gas station. What happened next is going to stay with me forever. 🥹 #storytime #fyp #kindness #heartwarming",
+        "link": "https://www.reddit.com/r/story/comments/1m11ee3/129_made_her_smile/"
+    },
+    {
+        "id": "story18",
+        "title": "I died just to break up with my Boyfriend",
+        "description": "He would not let me leave. So I did the only thing I could think of. I died. 💀 #storytime #fyp #drama #relationship",
+        "link": "https://www.reddit.com/r/story/comments/1qlq31i/i_died_just_to_break_up_with_my_boyfriend/"
     }
 ]
