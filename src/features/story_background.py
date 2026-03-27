@@ -74,7 +74,7 @@ class StoryBackground:
 
             audio_duration = Utils.get_duration(tts_audio)
             Utils.log(f"Audio duration: {audio_duration:.2f}s", "🎵")
-            if audio_duration > 180:
+            if audio_duration > 360:
                 Utils.log(
                     f"Error: Generated audio is {audio_duration:.2f}s long, which exceeds the 3-minute limit. Job {job_id} cancelled",
                     "❌",
@@ -83,7 +83,7 @@ class StoryBackground:
                     None,
                     caption=f"❌ Error: Generated audio is {audio_duration:.2f}s long, which exceeds the 3-minute limit. Job {job_id} cancelled",
                 )
-                return
+                return None
 
             transcript = self.transcriber.transcribe(tts_audio)
             Subtitles.build(transcript, srt_file)

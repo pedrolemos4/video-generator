@@ -48,7 +48,12 @@ class VideoGeneratorMiddleware:
 
         try:
             output_file = await self._dispatch(request, job_id)
-
+            if (
+                output_file == None
+                or output_file == ""
+                or not Path(output_file).exists()
+            ):
+                raise FileNotFoundError("Output file not found after processing")
             job.status = "done"
             job.output = str(output_file.resolve())
             job.duration = round(time.time() - start, 2)
